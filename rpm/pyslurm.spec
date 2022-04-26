@@ -1,18 +1,19 @@
 Summary: Slurm Interface for Python
-Name: python-pyslurm
+Name: python3.6-pyslurm
 #Name: python-slurm
-Version: 17.11.0.8
+Version: 20.11.8.0
 URL: http://www.gingergeeks.co.uk/pyslurm/index.html
 Release: 1%{?dist}
 License: GPL
 Packager: Olivier LAHAYE <olivier.lahaye@cea.fr>
 Group: Development/Languages
-Source: pyslurm-%{version}.tar.bz2
-Patch0: pyslurm_sphinx_theme.patch
+Source: v20.11.8-1.tar.gz
+#Patch0: pyslurm_sphinx_theme.patch
 #Patch1: pyslurm_doc_no_python_github.patch
 #Patch2: pyslurm_doc_version.patch
 BuildRoot: %{_tmppath}/%{name}
-BuildRequires: python-devel => 2.7 Cython >= 0.19 python-sphinx >= 1.1 slurm-devel >= 17.11.6
+Provides: python3-pyslurm
+BuildRequires: python3-devel => 3 python3-Cython >= 0.28 python3-sphinx >= 1.1 slurm-devel >= 20.11.7
 
 %description
 PySLURM is a Python/Cython extension module to the Simple Linux Unified
@@ -21,17 +22,20 @@ SLURM is typically used on HPC clusters such as those listed on the TOP500
 but can used on the smallest to the largest cluster. 
 
 %prep
-%setup -q -n pyslurm-%{version}
-%patch0 -p1
+%setup -q -n pyslurm-20.11.8-1
+#patch0 -p1
 
 %build
-%{__python} setup.py build --slurm=%{_prefix}
-sed -i -e '/sphinx.ext.githubpages/d' doc/source/conf.py
-(cd doc; PYTHONPATH=../build/lib.linux-x86_64-2.7/:/usr/lib/python2.7/site-packages/ make html; PYTHONPATH=../build/lib.linux-x86_64-2.7/:/usr/lib/python2.7/site-packages/ make man)
+%{__python3} setup.py build --slurm=%{_prefix}
+#sed -i -e '/sphinx.ext.githubpages/d' doc/source/conf.py
+(cd doc; PYTHONPATH=../build/lib.linux-x86_64-%{python3_version}/:%{python3_sitelib} \
+ make html SPHINXBUILD=sphinx-build-3;\
+ PYTHONPATH=../build/lib.linux-x86_64-%{python3_version}/:%{python3_sitelib} \
+ make man SPHINXBUILD=sphinx-build-3)
 
 %install
 rm -rf $RPM_BUILD_ROOT
-%{__python} setup.py install --prefix=%{_prefix} --optimize=2 --root=%buildroot --install-lib=%{python_sitearch}
+%{__python3} setup.py install --prefix=%{_prefix} --optimize=2 --root=%buildroot --install-lib=%{python3_sitearch}
 install -d %{buildroot}%{_mandir}/man1
 install -m 644 doc/build/man/pyslurm.1 %{buildroot}%{_mandir}/man1/
 
@@ -42,10 +46,12 @@ install -m 644 doc/build/man/pyslurm.1 %{buildroot}%{_mandir}/man1/
 %doc CONTRIBUTORS.rst COPYING.txt README.rst THANKS.rst
 %doc doc/build/html
 %doc examples
-%{python_sitearch}/pyslurm*
+%{python3_sitearch}/pyslurm*
 %{_mandir}/man1/pyslurm.1*
 
 %changelog
+* Fri Jan  7 2022 Olivier Lahaye <olivier.lahaye@cea.fr> 20.11.8.0-1
+- New version
 * Fri Apr 20 2018 Olivier Lahaye <olivier.lahaye@cea.fr> 17.11.0.7-1
 - New version
 * Thu Jun 22 2017 Olivier Lahaye <olivier.lahaye@cea.fr> 17.02-1
